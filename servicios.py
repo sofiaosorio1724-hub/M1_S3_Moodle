@@ -1,66 +1,76 @@
-def add_products(inventory, name, price, quantity):
-    product = {"name": name,
-                "price": price, 
-                "quantity": quantity
-    }
-    inventory.append(product)
+def agregar_producto(inventario, nombre, precio, cantidad):
+    producto = {"nombre": nombre, "precio": precio, "cantidad": cantidad}
+    inventario.append(producto)
 
-def show_inventory(inventory):
-    if not inventory:
-        print("Inventario vacio")
-        return              # se utiliza para salir de la funcion o retornar algo
-    
-    print("----Inventario----")
-    for product in inventory:
-        print(product)
 
-def search_product(inventory, name):
-    for product in inventory:
-        if product["name"] == name:
-            return product #si se encuentra lo muestra
-        
-    return None #por si no se encuentra
+def mostrar_inventario(inventario):
+    if len(inventario) == 0:
+        print("\nEl inventario está vacío\n")
+        return
 
-def update_product(inventory, name, new_price=None, new_quantity=None):
-    product = search_product(inventory, name)
+    calcular_subtotal = lambda p: p["precio"] * p["cantidad"]
 
-    if product is None:
-        return False #is compara identidad (si es literalmente el mismo objeto en memoria). 
-                    #mejorar dicho si lleva none va con is
-    
-    if new_price is not None: #si nuevo precio SI existe
-        product["price"] = new_price
+    print("\n--- INVENTARIO ---")
+    for i in range(len(inventario)): #recorre toda la lista
+        producto = inventario[i]  #dame el producto que esta en el inventario en la posion i
+        subtotal = calcular_subtotal(producto) #calcula subtotal y lo pone en cada producto
+        print(f"{i+1}. {producto['nombre']} | Precio: {producto['precio']} | Cantidad: {producto['cantidad']} | Subtotal: {subtotal}")
+    print("-------------------\n")
 
-    if new_quantity is not None:
-        product["quantity"] = new_quantity
+
+def buscar_producto(inventario, nombre):
+    for producto in inventario:
+        if producto["nombre"] == nombre:
+            return producto
+    return None
+
+
+def actualizar_producto(inventario, nombre, nuevo_precio=None, nueva_cantidad=None):
+    producto = buscar_producto(inventario, nombre)
+    if producto == None:
+        return False
+
+    if nuevo_precio is not None:
+        producto["precio"] = nuevo_precio
+    if nueva_cantidad is not None:
+        producto["cantidad"] = nueva_cantidad
 
     return True
 
-def delete_product(inventory, name):
-    product = search_product(inventory, name)
 
-    if product is None:
+def eliminar_producto(inventario, nombre):
+    producto = buscar_producto(inventario, nombre)
+    if producto == None:
         return False
-    
-    else: 
-        inventory.remove(product)
-        return True
+    inventario.remove(producto)
+    return True
 
-def calculate_statistics(inventory):
-    if not inventory:
+
+def calcular_estadisticas(inventario):
+    if len(inventario) == 0:
         return None
-    
-    sub_total = lambda product: product["price"] * product["quantity"]
 
-    total_units = sum(product["quantity"] for product in inventory)
-    total_value = sum(product["quantity"] for product in inventory)
+    subtotal = lambda p: p["precio"] * p["cantidad"]
 
-    exprensive_product = max(inventory, key=lambda product: product["price"])
-    product_stock = max(inventory, key=lambda product: product["quantity"] )
+    total_unidades = 0
+    total_valor = 0
 
-    return {"sub_total": sub_total,
-            "total_units": total_units,
-            "total_value": total_value,
-            "exprensive_product": exprensive_product,
-            "product_stock": product_stock
+    producto_mas_caro = inventario[0] #inventario[0], empieza a comparar en la lista desde el 0 hasta encontarr en el mas alto valor
+    producto_mayor_stock = inventario[0]
+
+    for producto in inventario:
+        total_unidades += producto["cantidad"]
+        total_valor += subtotal(producto)
+
+        if producto["precio"] > producto_mas_caro["precio"]:#Si el precio del producto actual es MAYOR que el del producto más caro encontrado hasta ahora actualizalo
+            producto_mas_caro = producto 
+
+        if producto["cantidad"] > producto_mayor_stock["cantidad"]:
+            producto_mayor_stock = producto
+
+    return {
+        "total_unidades": total_unidades,
+        "total_valor": total_valor,
+        "producto_mas_caro": producto_mas_caro,
+        "producto_mayor_stock": producto_mayor_stock
     }
